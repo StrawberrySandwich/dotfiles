@@ -1,0 +1,30 @@
+# Starship configuration with Rosé Pine Moon colors
+format = "$directory$git_branch$git_status$character"
+
+[directory]
+style = "#f6c177"
+truncation_length = 3
+truncate_to_repo = false
+
+[git_branch]
+style = "#c4a7e7"
+symbol = " "
+format = "[$symbol$branch]($style) "
+
+[git_status]
+style = "#ea9a97"
+format = "([$all_status$ahead_behind]($style))"
+
+[character]
+success_symbol = "[>](bold #c4a7e7)"
+error_symbol = "[>](bold #eb6f92)"
+
+# Optional: Add more modules with Rosé Pine colors
+[cmd_duration]
+style = "#f6c177"
+format = "[took $duration]($style)"
+
+[time]
+disabled = false
+style = "#c4a7e7"
+format = "[$time]($style)"
