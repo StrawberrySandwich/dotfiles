@@ -1,18 +1,27 @@
--- ~/.config/nvim/lua/config/options.lua
--- Core Neovim settings
+-- Options are automatically loaded before lazy.nvim startup
+-- Default options that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/options.lua
+-- Add any additional options here
+vim.opt.relativenumber = true
 
-local opt = vim.opt
-local g = vim.g
+vim.opt.sidescrolloff = 30
+vim.opt.colorcolumn = "80"
 
--- Leader keys
-g.mapleader = ","
-g.maplocalleader = ","
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 0
+vim.opt.softtabstop = -1
 
--- Line numbers
-opt.number = true
--- opt.relativenumber = true  -- Uncomment if you want relative numbers
+local original_handler = vim.lsp.handlers["$/progress"]
+vim.lsp.handlers["$/progress"] = function(_, result, ctx, ...)
+  if not result or not result.token then
+    return
+  end
 
--- Add any other global options here
--- opt.tabstop = 2
--- opt.shiftwidth = 2
--- opt.expandtab = true
+  local client = vim.lsp.get_client_by_id(ctx.client_id)
+  if client and client.name == "roslyn" then
+    return
+  end
+
+  if original_handler then
+    return original_handler(_, result, ctx, ...)
+  end
+end

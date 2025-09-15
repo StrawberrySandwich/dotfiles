@@ -1,7 +1,2 @@
--- ~/.config/nvim/init.lua
--- Main entry point for Neovim configuration
-
--- Load core configuration
-require("config.options")
-require("config.keymaps")
+-- bootstrap lazy.nvim, LazyVim and your plugins
 require("config.lazy")

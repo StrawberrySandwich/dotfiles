@@ -1,0 +1,10 @@
+[terminal.shell]
+program = "/opt/homebrew/bin/nu"
+
+[window]
+opacity = 0.75
+
+[general]
+import = [
+    "~/.config/alacritty/themes/themes/tokyo_night_storm.toml"
+]
