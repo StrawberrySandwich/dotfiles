@@ -6,6 +6,21 @@ vim.opt.relativenumber = true
 vim.opt.sidescrolloff = 30
 vim.opt.colorcolumn = "80"
 
+-- Use autocmd to override colorscheme
+vim.api.nvim_create_autocmd("ColorScheme", {
+  pattern = "*",
+  callback = function()
+    -- Soft overlay that works well with 75% opacity terminal
+    vim.cmd("highlight ColorColumn guibg=#4a2f3d")  -- Muted version of your pink
+  end,
+})
+
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function()
+    vim.cmd("highlight ColorColumn guibg=#4a2f3d")
+  end,
+})
+
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 0
 vim.opt.softtabstop = -1
