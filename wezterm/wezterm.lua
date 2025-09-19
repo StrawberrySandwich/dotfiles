@@ -46,6 +46,8 @@ return {
 		{ key = "RightArrow", mods = "ALT", action = wezterm.action.AdjustPaneSize({ "Right", 5 }) },
 		{ key = "UpArrow", mods = "ALT", action = wezterm.action.AdjustPaneSize({ "Up", 5 }) },
 		{ key = "DownArrow", mods = "ALT", action = wezterm.action.AdjustPaneSize({ "Down", 5 }) },
+		{ key = "UpArrow", mods = "ALT|SHIFT", action = wezterm.action.ScrollByPage(-1) },
+		{ key = "DownArrow", mods = "ALT|SHIFT", action = wezterm.action.ScrollByPage(1) },
 		{
 			key = "h", -- H for Header/Heading (works on all OS)
 			mods = "CTRL|SHIFT",
