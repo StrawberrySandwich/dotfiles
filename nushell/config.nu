@@ -1,4 +1,4 @@
-cd C:\\Users\\taylor.wisler\\Documents\\Projects
+cd ~/Documents/Projects
 
 use std/dirs
 
@@ -19,7 +19,7 @@ def grep [search: string] {
 	}
 }
 
-source "C:/Users/taylor.wisler/Documents/Projects/dotfiles/rose-pine-moon.nu"
+source ~/Documents/Projects/dotfiles/nushell/rose-pine-moon.nu
 #$env.config = ($env.config | upsert color_config (main))
 
 $env.LS_COLORS = "di=38;2;62;143;176:ex=38;2;196;167;231:*.zip=38;2;235;111;146:*.yml=38;2;246;193;119:*.yaml=38;2;246;193;119:*.sh=38;2;158;206;106:*.js=38;2;246;193;119:*.ts=38;2;156;207;216:*.json=38;2;234;154;151:*.md=38;2;234;154;151:*.txt=38;2;224;222;244:*.log=38;2;89;84;109:fi=38;2;224;222;244"
