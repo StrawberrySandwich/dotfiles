@@ -69,21 +69,21 @@ install_dependencies() {
 
     case $pm in
         "apt")
-            sudo apt install -y git curl build-essential unzip
+            sudo apt install -y git curl build-essential
             ;;
         "yum")
             sudo yum groupinstall -y "Development Tools"
-            sudo yum install -y git curl unzip
+            sudo yum install -y git curl
             ;;
         "dnf")
             sudo dnf groupinstall -y "Development Tools"
-            sudo dnf install -y git curl unzip
+            sudo dnf install -y git curl
             ;;
         "pacman")
-            sudo pacman -S --noconfirm git curl base-devel unzip
+            sudo pacman -S --noconfirm git curl base-devel
             ;;
         "zypper")
-            sudo zypper install -y git curl gcc make unzip
+            sudo zypper install -y git curl gcc make
             ;;
     esac
 }
@@ -205,47 +205,6 @@ install_nushell_via_cargo() {
     fi
 }
 
-# Install Nerd Font for Starship icons
-install_nerd_font() {
-    echo "🔤 Installing Nerd Font for Starship icons..."
-
-    # Create fonts directory
-    mkdir -p "$HOME/.local/share/fonts"
-
-    # Download JetBrains Mono Nerd Font (popular choice)
-    local font_url="https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/JetBrainsMono.zip"
-    local temp_dir=$(mktemp -d)
-
-    echo "📦 Downloading JetBrains Mono Nerd Font..."
-    cd "$temp_dir"
-    curl -L "$font_url" -o JetBrainsMono.zip
-
-    if [ -f "JetBrainsMono.zip" ]; then
-        echo "📁 Extracting font files..."
-        unzip -q JetBrainsMono.zip "*.ttf"
-
-        # Copy TTF files to fonts directory
-        find . -name "*.ttf" -exec cp {} "$HOME/.local/share/fonts/" \;
-
-        # Update font cache
-        if command -v fc-cache >/dev/null 2>&1; then
-            fc-cache -fv "$HOME/.local/share/fonts"
-            echo "✅ Font cache updated"
-        else
-            echo "⚠️  fc-cache not found, font cache not updated"
-        fi
-
-        echo "✅ JetBrains Mono Nerd Font installed"
-        echo "💡 Set your terminal font to 'JetBrainsMono Nerd Font' to see icons"
-    else
-        echo "❌ Failed to download Nerd Font"
-        echo "💡 You can manually install from: https://github.com/ryanoasis/nerd-fonts"
-    fi
-
-    # Cleanup
-    cd - >/dev/null
-    rm -rf "$temp_dir"
-}
 
 # Install Starship prompt
 install_starship() {
@@ -456,9 +415,6 @@ main() {
 
     # Install Starship
     install_starship
-
-    # Install Nerd Font for icons
-    install_nerd_font
 
     # Install dependencies
     install_dependencies
