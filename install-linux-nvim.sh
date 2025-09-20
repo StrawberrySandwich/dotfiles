@@ -69,21 +69,21 @@ install_dependencies() {
 
     case $pm in
         "apt")
-            sudo apt install -y git curl build-essential
+            sudo apt install -y git curl build-essential unzip
             ;;
         "yum")
             sudo yum groupinstall -y "Development Tools"
-            sudo yum install -y git curl
+            sudo yum install -y git curl unzip
             ;;
         "dnf")
             sudo dnf groupinstall -y "Development Tools"
-            sudo dnf install -y git curl
+            sudo dnf install -y git curl unzip
             ;;
         "pacman")
-            sudo pacman -S --noconfirm git curl base-devel
+            sudo pacman -S --noconfirm git curl base-devel unzip
             ;;
         "zypper")
-            sudo zypper install -y git curl gcc make
+            sudo zypper install -y git curl gcc make unzip
             ;;
     esac
 }
