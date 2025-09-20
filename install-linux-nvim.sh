@@ -368,48 +368,17 @@ setup_starship_config() {
     # Get the directory where this script is located
     SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-    # Check if starship config exists
+    # Create config directory
+    mkdir -p "$HOME/.config"
+
+    # Copy starship configuration files
     if [ -f "$SCRIPT_DIR/starship/starship.toml" ]; then
         echo "📁 Copying starship.toml..."
         cp "$SCRIPT_DIR/starship/starship.toml" "$HOME/.config/"
         echo "✅ Starship configuration copied to ~/.config/starship.toml"
     else
-        echo "⚠️  starship.toml not found in $SCRIPT_DIR/starship/"
-        echo "📝 Creating basic starship config..."
-
-        # Create a basic starship config if none exists
-        mkdir -p "$HOME/.config"
-        cat > "$HOME/.config/starship.toml" << 'EOF'
-# Starship configuration
-format = """
-$all\
-$character"""
-
-[character]
-success_symbol = "[❯](bold green)"
-error_symbol = "[❯](bold red)"
-
-[directory]
-truncation_length = 3
-truncation_symbol = "…/"
-
-[git_branch]
-symbol = "🌱 "
-
-[git_status]
-conflicted = "🏳"
-ahead = "🏎💨"
-behind = "😰"
-diverged = "😵"
-up_to_date = "✓"
-untracked = "🤷"
-stashed = "📦"
-modified = "📝"
-staged = '[++\($count\)](green)'
-renamed = "👅"
-deleted = "🗑"
-EOF
-        echo "✅ Basic starship configuration created"
+        echo "❌ starship.toml not found in $SCRIPT_DIR/starship/"
+        exit 1
     fi
 
     # Copy any additional starship config files
