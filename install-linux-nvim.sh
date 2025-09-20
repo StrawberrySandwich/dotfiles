@@ -437,14 +437,6 @@ setup_starship_config() {
     echo "✅ Starship configuration setup complete"
 }
 
-# Update Mason plugin references to use new organization
-update_mason_config() {
-    echo "🔧 Updating Mason plugin references..."
-
-    find "$HOME/.config/nvim" -name "*.lua" -type f -exec sed -i 's/williamboman\/mason/mason-org\/mason/g' {} \;
-
-    echo "✅ Mason plugin references updated"
-}
 
 # Main installation process
 main() {
@@ -478,7 +470,6 @@ main() {
 
     # Setup configurations
     setup_nvim_config
-    update_mason_config
     setup_nushell_config
     setup_starship_config
 
