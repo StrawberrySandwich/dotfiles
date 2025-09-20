@@ -1,5 +1,20 @@
 local wezterm = require("wezterm")
 
+-- Detect OS and set appropriate shell and environment
+local default_shell
+local set_environment_variables = {}
+
+if wezterm.target_triple == "x86_64-pc-windows-msvc" or wezterm.target_triple == "aarch64-pc-windows-msvc" then
+	default_shell = { "nu.exe" }
+else
+	default_shell = { "nu" }
+	-- Add Homebrew paths to PATH for macOS/Linux
+	local current_path = os.getenv("PATH") or ""
+	set_environment_variables = {
+		PATH = "/opt/homebrew/bin:/usr/local/bin:" .. current_path
+	}
+end
+
 return {
 	window_background_opacity = 0.75,
 
@@ -32,7 +47,8 @@ return {
 	},
 	font_size = 12.0,
 
-	default_prog = { "nu.exe" },
+	default_prog = default_shell,
+	set_environment_variables = set_environment_variables,
 
 	leader = { key = "q", mods = "CTRL", timeout_milliseconds = 1000 },
 	keys = {
