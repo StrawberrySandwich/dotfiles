@@ -8,22 +8,22 @@ set -e
 echo "🚀 Starting Linux Neovim installation..."
 
 # Check if running on Linux
-if [[ "$OSTYPE" != "linux-gnu"* ]]; then
+if [ "$(uname)" != "Linux" ]; then
     echo "❌ This script is designed for Linux only"
     exit 1
 fi
 
 # Function to detect package manager
 detect_package_manager() {
-    if command -v apt &> /dev/null; then
+    if command -v apt >/dev/null 2>&1; then
         echo "apt"
-    elif command -v yum &> /dev/null; then
+    elif command -v yum >/dev/null 2>&1; then
         echo "yum"
-    elif command -v dnf &> /dev/null; then
+    elif command -v dnf >/dev/null 2>&1; then
         echo "dnf"
-    elif command -v pacman &> /dev/null; then
+    elif command -v pacman >/dev/null 2>&1; then
         echo "pacman"
-    elif command -v zypper &> /dev/null; then
+    elif command -v zypper >/dev/null 2>&1; then
         echo "zypper"
     else
         echo "unknown"
@@ -90,7 +90,7 @@ install_dependencies() {
 
 # Install Node.js (required for many LSP servers)
 install_nodejs() {
-    if ! command -v node &> /dev/null; then
+    if ! command -v node >/dev/null 2>&1; then
         echo "📦 Installing Node.js..."
         curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
         sudo apt-get install -y nodejs
@@ -104,7 +104,7 @@ setup_nvim_config() {
     echo "⚙️  Setting up Neovim configuration..."
 
     # Get the directory where this script is located
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
     # Remove existing config if it exists
     if [ -d "$HOME/.config/nvim" ]; then
@@ -141,9 +141,10 @@ main() {
     echo "=================================="
 
     # Check if Neovim is already installed
-    if command -v nvim &> /dev/null; then
+    if command -v nvim >/dev/null 2>&1; then
         echo "✅ Neovim is already installed ($(nvim --version | head -n1))"
     else
+        echo "📦 Neovim not found, installing..."
         install_neovim
     fi
 
@@ -151,7 +152,7 @@ main() {
     install_dependencies
 
     # Install Node.js if on Debian/Ubuntu
-    if [[ $(detect_package_manager) == "apt" ]]; then
+    if [ "$(detect_package_manager)" = "apt" ]; then
         install_nodejs
     fi
 
