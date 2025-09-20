@@ -32,9 +32,69 @@ detect_package_manager() {
 
 # Install Neovim based on package manager
 install_neovim() {
+    echo "📦 Installing latest Neovim via snap..."
+
+    # Check if snap is available
+    if ! command -v snap >/dev/null 2>&1; then
+        echo "📦 Installing snapd..."
+        local pm=$(detect_package_manager)
+        case $pm in
+            "apt")
+                sudo apt update
+                sudo apt install -y snapd
+                ;;
+            "yum")
+                sudo yum install -y snapd
+                sudo systemctl enable --now snapd.socket
+                ;;
+            "dnf")
+                sudo dnf install -y snapd
+                sudo systemctl enable --now snapd.socket
+                ;;
+            "pacman")
+                sudo pacman -S --noconfirm snapd
+                sudo systemctl enable --now snapd.socket
+                ;;
+            "zypper")
+                sudo zypper install -y snapd
+                sudo systemctl enable --now snapd.socket
+                ;;
+            *)
+                echo "❌ Cannot install snapd. Using package manager fallback..."
+                install_neovim_fallback
+                return
+                ;;
+        esac
+    fi
+
+    # Remove old neovim if installed via package manager
+    local pm=$(detect_package_manager)
+    case $pm in
+        "apt")
+            sudo apt remove -y neovim >/dev/null 2>&1 || true
+            ;;
+        "dnf"|"yum")
+            sudo $pm remove -y neovim >/dev/null 2>&1 || true
+            ;;
+        "pacman")
+            sudo pacman -Rs --noconfirm neovim >/dev/null 2>&1 || true
+            ;;
+        "zypper")
+            sudo zypper remove -y neovim >/dev/null 2>&1 || true
+            ;;
+    esac
+
+    # Install neovim via snap
+    sudo snap install nvim --classic
+
+    echo "✅ Neovim installed via snap"
+}
+
+# Fallback installation method
+install_neovim_fallback() {
     local pm=$(detect_package_manager)
 
-    echo "📦 Installing Neovim using $pm..."
+    echo "📦 Installing Neovim using package manager (may be older version)..."
 
     case $pm in
         "apt")
