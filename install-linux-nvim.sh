@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Linux Neovim + Nushell Installation Script
-# Installs Neovim, Nushell, and applies personal configurations
+# Linux Neovim + Nushell + Starship Installation Script
+# Installs Neovim, Nushell, Starship, and applies personal configurations
 
 set -e
 
-echo "🚀 Starting Linux Neovim + Nushell installation..."
+echo "🚀 Starting Linux Neovim + Nushell + Starship installation..."
 
 # Check if running on Linux
 if [ "$(uname)" != "Linux" ]; then
@@ -205,6 +205,96 @@ install_nushell_via_cargo() {
     fi
 }
 
+# Install Starship prompt
+install_starship() {
+    if command -v starship >/dev/null 2>&1; then
+        echo "✅ Starship already installed ($(starship --version))"
+        return
+    fi
+
+    echo "✨ Installing Starship prompt..."
+
+    # Use the official Starship installer
+    curl -sS https://starship.rs/install.sh | sh -s -- -y
+
+    # Alternative method if the installer fails
+    if ! command -v starship >/dev/null 2>&1; then
+        echo "🔄 Trying alternative installation method..."
+
+        local arch=$(uname -m)
+        local os="unknown-linux-musl"
+
+        # Map architecture names for Starship
+        case $arch in
+            "x86_64")
+                arch="x86_64"
+                ;;
+            "aarch64"|"arm64")
+                arch="aarch64"
+                ;;
+            "armv7l")
+                arch="arm"
+                os="unknown-linux-gnueabihf"
+                ;;
+            *)
+                echo "❌ Unsupported architecture for Starship: $arch"
+                echo "Trying cargo installation..."
+                install_starship_via_cargo
+                return
+                ;;
+        esac
+
+        # Download latest release
+        local latest_url="https://api.github.com/repos/starship/starship/releases/latest"
+        local download_url=$(curl -s "$latest_url" | grep -o "https://github.com/starship/starship/releases/download/[^\"]*starship-${arch}-${os}\.tar\.gz" | head -n1)
+
+        if [ -n "$download_url" ]; then
+            echo "📦 Downloading Starship from: $download_url"
+            local temp_dir=$(mktemp -d)
+            cd "$temp_dir"
+
+            curl -L "$download_url" -o starship.tar.gz
+            tar -xzf starship.tar.gz
+
+            if [ -f "starship" ]; then
+                sudo mv starship /usr/local/bin/
+                sudo chmod +x /usr/local/bin/starship
+                echo "✅ Starship installed to /usr/local/bin/starship"
+            else
+                echo "❌ Failed to extract Starship binary"
+                install_starship_via_cargo
+            fi
+
+            cd - >/dev/null
+            rm -rf "$temp_dir"
+        else
+            echo "❌ Could not find Starship release for $arch-$os"
+            install_starship_via_cargo
+        fi
+    fi
+}
+
+# Install Starship via Cargo (fallback method)
+install_starship_via_cargo() {
+    echo "🦀 Installing Starship via Cargo..."
+
+    # Install Rust if not present
+    if ! command -v cargo >/dev/null 2>&1; then
+        echo "📦 Installing Rust toolchain for Starship..."
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        source "$HOME/.cargo/env"
+    fi
+
+    # Install starship via cargo
+    cargo install starship --locked
+
+    # Add cargo bin to PATH if not already there
+    if ! echo "$PATH" | grep -q "$HOME/.cargo/bin"; then
+        echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> "$HOME/.bashrc"
+        echo "✅ Added cargo bin to PATH in .bashrc"
+    fi
+}
+
 # Setup Neovim configuration
 setup_nvim_config() {
     echo "⚙️  Setting up Neovim configuration..."
@@ -271,6 +361,71 @@ setup_nushell_config() {
     echo "✅ Nushell configuration setup complete"
 }
 
+# Setup Starship configuration
+setup_starship_config() {
+    echo "✨ Setting up Starship configuration..."
+
+    # Get the directory where this script is located
+    SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+    # Check if starship config exists
+    if [ -f "$SCRIPT_DIR/starship/starship.toml" ]; then
+        echo "📁 Copying starship.toml..."
+        cp "$SCRIPT_DIR/starship/starship.toml" "$HOME/.config/"
+        echo "✅ Starship configuration copied to ~/.config/starship.toml"
+    else
+        echo "⚠️  starship.toml not found in $SCRIPT_DIR/starship/"
+        echo "📝 Creating basic starship config..."
+
+        # Create a basic starship config if none exists
+        mkdir -p "$HOME/.config"
+        cat > "$HOME/.config/starship.toml" << 'EOF'
+# Starship configuration
+format = """
+$all\
+$character"""
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+
+[directory]
+truncation_length = 3
+truncation_symbol = "…/"
+
+[git_branch]
+symbol = "🌱 "
+
+[git_status]
+conflicted = "🏳"
+ahead = "🏎💨"
+behind = "😰"
+diverged = "😵"
+up_to_date = "✓"
+untracked = "🤷"
+stashed = "📦"
+modified = "📝"
+staged = '[++\($count\)](green)'
+renamed = "👅"
+deleted = "🗑"
+EOF
+        echo "✅ Basic starship configuration created"
+    fi
+
+    # Copy any additional starship config files
+    if [ -d "$SCRIPT_DIR/starship" ]; then
+        echo "📁 Copying additional starship config files..."
+        for file in "$SCRIPT_DIR/starship"/*; do
+            if [ -f "$file" ] && [ "$(basename "$file")" != "starship.toml" ]; then
+                cp "$file" "$HOME/.config/"
+                echo "  Copied $(basename "$file") to ~/.config/"
+            fi
+        done
+    fi
+
+    echo "✅ Starship configuration setup complete"
+}
+
 # Update Mason plugin references to use new organization
 update_mason_config() {
     echo "🔧 Updating Mason plugin references..."
@@ -282,8 +437,8 @@ update_mason_config() {
 
 # Main installation process
 main() {
-    echo "🐧 Linux Neovim + Nushell Installation Script"
-    echo "============================================"
+    echo "🐧 Linux Neovim + Nushell + Starship Installation Script"
+    echo "======================================================="
 
     # Check if Neovim is already installed
     if command -v nvim >/dev/null 2>&1; then
@@ -295,6 +450,9 @@ main() {
 
     # Install Nushell
     install_nushell
+
+    # Install Starship
+    install_starship
 
     # Install dependencies
     install_dependencies
@@ -308,6 +466,7 @@ main() {
     setup_nvim_config
     update_mason_config
     setup_nushell_config
+    setup_starship_config
 
     echo ""
     echo "🎉 Installation complete!"
@@ -317,9 +476,10 @@ main() {
     echo "2. LazyVim will automatically install plugins on first run"
     echo "3. Use ':Mason' to install additional LSP servers"
     echo "4. Run 'nu' to start Nushell with your configuration"
-    echo "5. Consider setting Nushell as default shell: chsh -s \$(which nu)"
+    echo "5. Starship prompt is ready to use (add 'eval \"\$(starship init bash)\"' to .bashrc for bash)"
+    echo "6. Consider setting Nushell as default shell: chsh -s \$(which nu)"
     echo ""
-    echo "Enjoy your Neovim + Nushell setup! 🚀"
+    echo "Enjoy your complete development setup! 🚀✨"
 }
 
 # Run the main function
